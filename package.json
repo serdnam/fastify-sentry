@@ -1,0 +1,46 @@
+{
+  "name": "@serdnam/fastify-sentry",
+  "version": "0.0.0",
+  "description": "Fastify Sentry plugin",
+  "type": "module",
+  "exports": "./dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/index.*"
+  ],
+  "scripts": {
+    "test": "npm run build && tap dist/test/*.test.js",
+    "build": "rimraf dist && tsc"
+  },
+  "tap": {
+    "ts": false,
+    "coverage": false,
+    "node-arg": [
+      "--no-warnings",
+      "--loader=testdouble"
+    ]
+  },
+  "author": "Andrés Mármol - @serdnam",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "@sentry/node": "^6.17.9",
+    "@sentry/tracing": "^6.17.9",
+    "fastify-plugin": "^3.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.19",
+    "@types/tap": "^15.0.5",
+    "@typescript-eslint/eslint-plugin": "^5.12.1",
+    "@typescript-eslint/parser": "^5.12.1",
+    "eslint": "^8.9.0",
+    "fastify": "^3.27.2",
+    "rimraf": "^3.0.2",
+    "tap": "^15.1.6",
+    "testdouble": "^3.16.4",
+    "ts-node": "^10.5.0",
+    "typescript": "^4.5.5"
+  }
+}
