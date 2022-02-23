@@ -251,9 +251,6 @@ export default fastifyPlugin(async function FastifySentry(fastify, options) {
 
 
             scope.setSpan(tx)
-            
-
-            
         })
 
         for(const currentHookName of opts.performance.hooks) {
@@ -276,7 +273,7 @@ export default fastifyPlugin(async function FastifySentry(fastify, options) {
             }
     
             const finishSpan = function (req: FastifyRequest) {
-                req[currentHook.symbol].finish()
+                req[currentHook.symbol]?.finish()
             }
     
             
