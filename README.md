@@ -184,7 +184,7 @@ The `onResponse` hook is not supported.
 
 When an error occurs, the error handler set by this plugin captures the error with `Sentry.captureException` and then executes a Promise-returning function returned by `errorHandlerFactory`, passing it the error, request, and reply parameters and setting `this` to the Fastify instance (as if it were called by Fastify itself).
 
-If no function is provided as an argument, a default async function which logs the error message, sets the status code to 500 and returns
+If no function is provided as an argument, a default async function which logs the error message and then returns either the error itself if the status code is not 500, or the following if the status code is 500:
 
 ```json
 {
@@ -192,8 +192,6 @@ If no function is provided as an argument, a default async function which logs t
     "message": "Internal server error"
 }
 ```
-
-to the client is used.
 
 * `closeTimeout`
 

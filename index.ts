@@ -147,11 +147,14 @@ function validateConfiguration(options: FastifySentryOptions): CleanOptions {
 
     opts.errorHandlerFactory = opts.errorHandlerFactory ?? (
         () => (async function defaultErrorHandlerFactory(err, req, rep) {
-            req.log.error(err.message)
-            rep.status(500)
-            return {
-                error: 500,
-                message: 'Internal server error'
+            rep.log.error(err)
+            if (rep.statusCode === 500) {
+                return {
+                    error: 500,
+                    message: 'Internal server error'
+                }
+            } else {
+                return err
             }
     }))
 
