@@ -1,6 +1,6 @@
 {
   "name": "@serdnam/fastify-sentry",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Fastify Sentry plugin",
   "type": "module",
   "exports": "./dist/index.js",
@@ -50,5 +50,4 @@
   "bugs": {
     "url": "https://github.com/serdnam/fastify-sentry/issues"
   }
-
 }
