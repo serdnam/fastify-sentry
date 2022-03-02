@@ -52,6 +52,8 @@ The following captures and sends errors to Sentry as well, but also sets up a Se
 import Fastify from 'fastify';
 import FastifySentry from '@serdnam/fastify-sentry';
 
+const server = Fastify({ logger: true });
+
 server.register(FastifySentry, {
     sentryOptions: {
         dsn: "https://public@sentry.example.com/1",

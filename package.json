@@ -42,5 +42,13 @@
     "testdouble": "^3.16.4",
     "ts-node": "^10.5.0",
     "typescript": "^4.5.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/serdnam/fastify-sentry.git"
+  },
+  "bugs": {
+    "url": "https://github.com/serdnam/fastify-sentry/issues"
   }
+
 }
