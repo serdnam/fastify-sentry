@@ -8,13 +8,17 @@ import * as Sentry from "@sentry/node"
 import * as Tracing from "@sentry/tracing"
 import { Scope, Span, Transaction } from "@sentry/types"
 
-import type { 
+import type {
+    DoneFuncWithErrOrRes,
     FastifyInstance, 
     FastifyPluginAsync, 
     FastifyReply, 
     FastifyRequest, 
+    HookHandlerDoneFunction, 
     onRequestAsyncHookHandler, 
+    onRequestHookHandler, 
     preParsingAsyncHookHandler, 
+    preParsingHookHandler, 
     RequestPayload
 } from "fastify"
 import fastifyPlugin from 'fastify-plugin'
@@ -281,19 +285,23 @@ export default fastifyPlugin(async function FastifySentry(fastify, options) {
     
             
     
-            const currentHookWithoutPayload = async function (
+            const currentHookWithoutPayload = function (
                 this: FastifyInstance, 
                 req: FastifyRequest, 
-                reply: FastifyReply) {
+                reply: FastifyReply,
+                done: HookHandlerDoneFunction) {
                 startSpan(req)
+                done()
             }
             
-            const currentHookWithPayload = async function (
+            const currentHookWithPayload = function (
                 this: FastifyInstance, 
                 req: FastifyRequest, 
                 reply: FastifyReply, 
-                payload: RequestPayload) {
+                payload: RequestPayload,
+                done: DoneFuncWithErrOrRes) {
                 startSpan(req)
+                done(null, payload)
             }
 
             
@@ -306,12 +314,14 @@ export default fastifyPlugin(async function FastifySentry(fastify, options) {
                 fastify.addHook(currentHook.name as any, currentHookWithoutPayload)
             }
             
-            const nextHookWithoutPayload: onRequestAsyncHookHandler = async function (req, reply) {
+            const nextHookWithoutPayload: onRequestHookHandler = function (req, reply, done) {
                 finishSpan(req)
+                done()
             }
             
-            const nextHookWithPayload: preParsingAsyncHookHandler = async function (req, reply, payload) {
+            const nextHookWithPayload: preParsingHookHandler = function (req, reply, payload, done) {
                 finishSpan(req)
+                done()
             }
     
             if(hookHandlesPayload(nextHook.name)) {
@@ -321,10 +331,11 @@ export default fastifyPlugin(async function FastifySentry(fastify, options) {
             }
         }
 
-        fastify.addHook('onResponse', async function (req, rep) {
+        fastify.addHook('onResponse', function (req, rep, done) {
             const tx = req[getTx]()
             tx.setHttpStatus(rep.statusCode)
             tx.finish()
+            done()
         })
     }
 
