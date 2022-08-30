@@ -5,7 +5,7 @@
 import * as Sentry from "@sentry/node"
 // Sentry requires this to be imported
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import * as Tracing from "@sentry/tracing"
+import "@sentry/tracing"
 import { Scope, Span, Transaction } from "@sentry/types"
 
 import type {
