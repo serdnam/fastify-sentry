@@ -248,16 +248,6 @@ export default fastifyPlugin(async function FastifySentry(fastify, options) {
 
 
             req[setTx](tx)
-
-    
-            const scope: Scope = await new Promise((res, rej) => {
-                Sentry.configureScope(scope => {
-                    res(scope)
-                })
-            })
-
-
-            scope.setSpan(tx)
         })
 
         for(const currentHookName of opts.performance.hooks) {
