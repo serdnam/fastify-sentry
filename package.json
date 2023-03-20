@@ -1,8 +1,9 @@
 {
   "name": "@serdnam/fastify-sentry",
-  "version": "5.0.1",
+  "version": "6.0.0",
   "description": "Fastify Sentry plugin",
   "type": "module",
+  "main": "./dist/index.cjs",
   "exports": {
     ".": {
       "require": "./dist/index.cjs",
