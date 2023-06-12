@@ -1,17 +1,20 @@
 import * as Sentry from "@sentry/node";
 import tap from 'tap';
-import { getTx, SentrySymbol } from '../index.js';
+import { getTx } from '../lib/plugin.js';
 
 import fastify from "fastify";
-import fastifySentry, { FastifySentryOptions } from "../index.js";
+import { FastifySentry } from "../lib/plugin.js";
 import { RouteHandlerMethod } from "fastify/types/route";
+import { FastifySentryOptions } from "../lib/types.js";
 
 const DSN = 'https://public@sentry.example.com/1';
 
 async function build(options: FastifySentryOptions, dummyHandler?: RouteHandlerMethod) {
     const server = fastify({});
 
-    server.register(fastifySentry, options);
+    console.log(typeof FastifySentry)
+
+    server.register(FastifySentry, options);
 
     server.get('/error', async function(req, rep) {
         throw new Error('Error!');
@@ -29,29 +32,6 @@ async function build(options: FastifySentryOptions, dummyHandler?: RouteHandlerM
 
 
 tap.test('validation', async (t) => {
-    t.test('Rejects non-function errorHandlerFactory', async (t) => {
-        await t.rejects(async () => {
-            const server = await build({ 
-                sentryOptions: {
-                    dsn: DSN
-                },
-                errorHandlerFactory: () => 1 as any
-            });
-
-        })
-    });
-
-    t.test('Rejects non-function errorHandlerFactory return value', async (t) => {
-        await t.rejects(async () => {
-            const server = await build({ 
-                sentryOptions: {
-                    dsn: DSN
-                },
-                errorHandlerFactory: () => 1 as any
-            });
-
-        })
-    });
 
     t.test('Rejects an unknown hook name', async (t) => {
         await t.rejects(async () => {
@@ -100,29 +80,12 @@ tap.test('validation', async (t) => {
         })
     });
 
-    t.test('Properly sets the Sentry object', async (t) => {
-        const server = await build({
-            sentryOptions: {
-                dsn: DSN
-            },
-            performance: {
-                hooks: [
-                'onRequest',
-                'preParsing',
-                'preValidation',
-                'preHandler',
-                'preSerialization',
-                'onSend'
-                ]
-            },
-        });
-        t.equal(server[SentrySymbol], Sentry);
-    });
+
 
 
     t.test('Properly sets the public objects on the instance and request', async (t) => {
 
-        t.plan(3);
+        t.plan(2);
         const server = await build({
             sentryOptions: {
                 dsn: DSN,
@@ -137,11 +100,7 @@ tap.test('validation', async (t) => {
                     'onSend'
                 ]
             },
-            errorHandlerFactory: () => async function (err, req, rep) {
-                console.log(err)
-            }
         }, async function (req, rep) {
-            t.ok(this[SentrySymbol]);
             t.ok(req[getTx]);
             t.ok(req[getTx]())
             return {}

@@ -1,11 +1,15 @@
 import Fastify from 'fastify';
-import FastifySentry, { getTx, SentrySymbol } from '../index.js';
+import pino, { levels } from 'pino'
+import Sentry, { FastifySentry, getTx } from '../index.js';
+import { setTimeout } from 'timers/promises';
 
-const server = Fastify({ logger: true });
+
+const server = Fastify({ logger: true })
+let counter = 0;
 
 server.register(FastifySentry, {
         sentryOptions: {
-            dsn: "https://public@sentry.example.com/1",
+            dsn: "",
             tracesSampleRate: 1.0,
             debug: true
         },
@@ -22,25 +26,65 @@ server.register(FastifySentry, {
     }
 );
 
+server.decorateRequest('counter', 0)
+
 server.addHook('onRequest', async function (req, rep) {
-    const tx = req[getTx]();
-    tx.setTag('hookKey', 'I am setting a tag in a Fastify hook!');
+    (req as any).counter = counter++
+    const tx = Sentry.getCurrentHub().getScope().getTransaction()
+    
+    tx?.setTag('hookKey', `I am setting a tag in an onRequest Fastify hook!`);
+    console.log('onRequest', (req as any).counter, tx)
+    console.log((req as any).counter)
+})
+
+server.addHook('preParsing', async function (req, rep) {
+    const tx = Sentry.getCurrentHub().getScope().getTransaction()
+    await setTimeout(Math.floor(Math.random() * 10000))
+    tx?.setTag('hookKey', `I am setting a tag in an preParsing Fastify hook!`);
+    console.log('preParsing', tx)
+    console.log((req as any).counter)
+})
+
+server.addHook('preValidation', async function (req, rep) {
+    const tx = Sentry.getCurrentHub().getScope().getTransaction()
+    await setTimeout(Math.floor(Math.random() * 10000))
+    tx?.setTag('hookKey', `I am setting a tag in an preValidation Fastify hook!`);
+    console.log('preValidation', tx)
+    console.log((req as any).counter)
+})
+
+server.addHook('preHandler', async function (req, rep) {
+    const tx = Sentry.getCurrentHub().getScope().getTransaction()
+    await setTimeout(Math.floor(Math.random() * 10000))
+    tx?.setTag('hookKey', `I am setting a tag in an preHandler Fastify hook!`);
+    console.log('preHandler', tx)
+    console.log((req as any).counter)
+})
+
+
+server.addHook('onSend', async function (req, rep) {
+    const tx = Sentry.getCurrentHub().getScope().getTransaction()
+    await setTimeout(Math.floor(Math.random() * 10000))
+    tx?.setTag('hookKey', `I am setting a tag in an onSend Fastify hook!`);
+    console.log('onSend', tx)
+    console.log((req as any).counter)
+    req.log.info('COUNTER', (req as any).counter)
 })
 
 server.register(async function route(fastify, options) {
     fastify.get('/', async function(this, req, reply) {
-        const Sentry = this[SentrySymbol];
+        
         const tx = req[getTx]();
-        tx.setTag('requestKey', 'I am setting a tag in a route handler!');
+        tx?.setTag('requestKey', 'I am setting a tag in a route handler!');
         return { status: `OK` };
     });
-}, { prefix: 'health' });
+}, { prefix: 'test' });
 
 
 (async () => {
     try {
         await server.ready();
-        await server.listen(4000, '0.0.0.0')
+        await server.listen({ port: 4000, host: '0.0.0.0' })
     } catch (err) {
         server.log.error(err)
         process.exit(1)

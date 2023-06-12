@@ -1,5 +1,5 @@
 import Fastify from 'fastify';
-import FastifySentry from '../index.js';
+import { FastifySentry } from '../lib/plugin.js';
 
 const server = Fastify({ logger: true });
 
@@ -26,7 +26,7 @@ server.register(async function route(fastify, options) {
     fastify.get('/', async function (req, reply) {
         return { status: `OK` };
     });
-}, { prefix: 'health' });
+}, { prefix: 'test' });
 
 
 (async () => {

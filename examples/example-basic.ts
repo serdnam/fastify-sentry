@@ -1,5 +1,5 @@
 import Fastify from 'fastify';
-import FastifySentry from '../index.js';
+import Sentry, { FastifySentry, getTx } from '../index.js';
 
 const server = Fastify({ logger: true });
 
@@ -14,15 +14,23 @@ server.register(FastifySentry, {
 
 server.register(async function route(fastify, options) {
     fastify.get('/', async function(req, reply) {
+        if (Math.random() < 0.5) {
+            throw new Error('Error')
+        }
         return { status: `OK` };
     });
-}, { prefix: 'health' });
+}, { prefix: 'test' });
+
+server.setErrorHandler((error, req, rep)  => {
+    Sentry.captureException(error)
+    rep.status(500).send({ message: 'Server error' })
+});
 
 
 (async () => {
     try {
         await server.ready();
-        await server.listen(4000, '0.0.0.0')
+        await server.listen({ port: 4000, host: '0.0.0.0' })
     } catch (err) {
         server.log.error(err)
         process.exit(1)

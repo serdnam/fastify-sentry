@@ -18,7 +18,7 @@
       "require-await": "off",
       "@typescript-eslint/require-await": "off",
       "@typescript-eslint/no-floating-promises": "off",
-      "max-len": ["error", { "code": 110 }],
+      "max-len": ["error", { "code": 130 }],
       "semi": ["error", "never"]
     }
     
