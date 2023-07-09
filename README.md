@@ -37,7 +37,7 @@ server.register(async function route(fastify, options) {
 (async () => {
     try {
         await server.ready();
-        await server.listen(4000, '0.0.0.0')
+        await server.listen({ host: '0.0.0.0', port: 4000 })
     } catch (err) {
         server.log.error(err)
         process.exit(1)
@@ -83,7 +83,7 @@ server.register(async function route(fastify, options) {
 (async () => {
 try {
     await server.ready();
-    await server.listen(4000, '0.0.0.0')
+    await server.listen({ host: '0.0.0.0', port: 4000 })
 } catch (err) {
     server.log.error(err)
     process.exit(1)
@@ -91,12 +91,12 @@ try {
 })();
 ```
 
-You can also access the current request's Sentry Transaction object by using the Transaction getter, which you can obtain by using the `getTx` symbol. The Sentry object itself is also available on the FastifyInstance object as a simple property on the `SentrySymbol` symbol.
+You can also access the current request's Sentry Transaction object by using the Transaction getter, which you can obtain by using the `getTx` symbol. You can obtain the sentry object itself by just importing it from this package.
 
 ```ts
 
 import Fastify from 'fastify';
-import FastifySentry, { getTx } from '@serdnam/fastify-sentry';
+import Sentry, { FastifySentry, getTx } from '@serdnam/fastify-sentry';
 
 const server = Fastify({ logger: true });
 
@@ -126,7 +126,6 @@ server.addHook('onRequest', async function (req, rep) {
 
 server.register(async function route(fastify, options) {
     fastify.get('/', async function(this, req, reply) {
-        const Sentry = this[SentrySymbol];
         const tx = req[getTx]();
         tx.setTag('requestKey', 'I am setting a tag in a route handler!');
         return { status: `OK` };
@@ -137,7 +136,7 @@ server.register(async function route(fastify, options) {
 (async () => {
     try {
         await server.ready();
-        await server.listen(4000, '0.0.0.0')
+        await server.listen({ host: '0.0.0.0', port: 4000 })
     } catch (err) {
         server.log.error(err)
         process.exit(1)
@@ -156,8 +155,8 @@ export interface FastifySentryOptions {
     performance?: {
         hooks: string[],
     }
-    errorHandlerFactory?: () => Parameters<FastifyInstance['setErrorHandler']>[0]
     closeTimeout?: number
+    captureException?: boolean
 }
 ```
 
@@ -182,18 +181,10 @@ makes the plugin create a span within the main transaction that starts when the 
 The `onResponse` hook is not supported.
 
 
-* `errorHandlerFactory`
+* `captureException`
 
-When an error occurs, the error handler set by this plugin captures the error with `Sentry.captureException` and then executes a Promise-returning function returned by `errorHandlerFactory`, passing it the error, request, and reply parameters and setting `this` to the Fastify instance (as if it were called by Fastify itself).
+When an error occurs, and if this option is set to `true`, this plugin will call `Sentry.captureException()` on the error and will then forward the error to the next error handler. This option is `true` by default.
 
-If no function is provided as an argument, a default async function which logs the error message and then returns either the error itself if the status code is not 500, or the following if the status code is 500:
-
-```json
-{
-    "error": 500,
-    "message": "Internal server error"
-}
-```
 
 * `closeTimeout`
 

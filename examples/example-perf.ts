@@ -1,5 +1,5 @@
 import Fastify from 'fastify';
-import FastifySentry from '../index.js';
+import { FastifySentry } from '../lib/plugin.js';
 
 const server = Fastify({ logger: true });
 
@@ -26,13 +26,13 @@ server.register(async function route(fastify, options) {
     fastify.get('/', async function (req, reply) {
         return { status: `OK` };
     });
-}, { prefix: 'health' });
+}, { prefix: 'test' });
 
 
 (async () => {
 try {
     await server.ready();
-    await server.listen(4000, '0.0.0.0')
+    await server.listen({ host: '0.0.0.0', port: 4000 })
 } catch (err) {
     server.log.error(err)
     process.exit(1)
