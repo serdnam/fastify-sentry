@@ -24,6 +24,7 @@ export interface FastifySentryOptions {
         hooks: string[],
     }
     closeTimeout?: number
+    captureException?: boolean
 }
 
 export interface CleanOptions {
@@ -32,4 +33,5 @@ export interface CleanOptions {
         hooks: FastifyHook[],
     }
     closeTimeout: number
+    captureException: boolean
 }

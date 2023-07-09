@@ -88,7 +88,8 @@ function hookHandlesPayload(
 function validateConfiguration(options: FastifySentryOptions): CleanOptions {
     const opts = Object.assign({}, options)
 
-    opts.closeTimeout = opts.closeTimeout ?? 1000 
+    opts.closeTimeout = opts.closeTimeout ?? 1000
+    opts.captureException = opts.captureException ?? true
 
     if(opts.performance && opts.performance.hooks) {
 
@@ -99,7 +100,8 @@ function validateConfiguration(options: FastifySentryOptions): CleanOptions {
                 performance: {
                     hooks: opts.performance.hooks || []
                 },
-                closeTimeout: opts.closeTimeout
+                closeTimeout: opts.closeTimeout,
+                captureException: opts.captureException
             }
         } else {
             throw new Error('Invalid hook(s) passed as parameter to performance.hooks')
@@ -108,7 +110,8 @@ function validateConfiguration(options: FastifySentryOptions): CleanOptions {
 
     return {
         sentryOptions: opts.sentryOptions,
-        closeTimeout: opts.closeTimeout
+        closeTimeout: opts.closeTimeout,
+        captureException: opts.captureException
     }
 }
 
@@ -271,6 +274,23 @@ const FastifySentry = fastifyPlugin(async function FastifySentry(fastify, option
                 fastify.addHook(nextHook.name as any, nextHookWithoutPayload)
             }
         }
+
+        fastify.setErrorHandler(function (error, request, reply) {
+            for (let i = FASTIFY_HOOKS.length - 1; i >= 0; i--) {
+                const hookName = FASTIFY_HOOKS[i].name
+                const span = request[spansSymbol][hookName]
+                if (span) {
+                    span.finish()
+                    break
+                }
+            }
+            if (opts.captureException) {
+                Sentry.captureException(error)
+            }
+            // Forward error to next handler
+            reply.send(error)
+        })
+        
 
         fastify.addHook('onResponse', function (req, rep, done) {
             const tx = req[getTx]()

@@ -1,5 +1,5 @@
 import Fastify from 'fastify';
-import Sentry, { FastifySentry, getTx } from '../index.js';
+import { FastifySentry, getTx } from '../index.js';
 
 const server = Fastify({ logger: true });
 
@@ -21,10 +21,6 @@ server.register(async function route(fastify, options) {
     });
 }, { prefix: 'test' });
 
-server.setErrorHandler((error, req, rep)  => {
-    Sentry.captureException(error)
-    rep.status(500).send({ message: 'Server error' })
-});
 
 
 (async () => {
