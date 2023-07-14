@@ -273,9 +273,8 @@ const FastifySentry = fastifyPlugin(async function FastifySentry(fastify, option
             } else {
                 fastify.addHook(nextHook.name as any, nextHookWithoutPayload)
             }
-        }
-
-        fastify.setErrorHandler(function (error, request, reply) {
+        }       
+        fastify.addHook('onError', function (request, reply, error, done) {
             for (let i = FASTIFY_HOOKS.length - 1; i >= 0; i--) {
                 const hookName = FASTIFY_HOOKS[i].name
                 const span = request[spansSymbol][hookName]
@@ -287,10 +286,8 @@ const FastifySentry = fastifyPlugin(async function FastifySentry(fastify, option
             if (opts.captureException) {
                 Sentry.captureException(error)
             }
-            // Forward error to next handler
-            reply.send(error)
+            done()
         })
-        
 
         fastify.addHook('onResponse', function (req, rep, done) {
             const tx = req[getTx]()
