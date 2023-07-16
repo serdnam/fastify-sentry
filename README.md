@@ -14,7 +14,7 @@ The following enables forwarding any error that occurs during the request to Sen
 
 ```ts
 import Fastify from 'fastify';
-import FastifySentry from '@serdnam/fastify-sentry';
+import { FastifySentry } from '@serdnam/fastify-sentry';
 
 const server = Fastify({ logger: true });
 
@@ -50,7 +50,7 @@ The following captures and sends errors to Sentry as well, but also sets up a Se
 
 ```ts
 import Fastify from 'fastify';
-import FastifySentry from '@serdnam/fastify-sentry';
+import { FastifySentry } from '@serdnam/fastify-sentry';
 
 const server = Fastify({ logger: true });
 
@@ -91,7 +91,7 @@ try {
 })();
 ```
 
-You can also access the current request's Sentry Transaction object by using the Transaction getter, which you can obtain by using the `getTx` symbol. You can obtain the sentry object itself by just importing it from this package.
+You can also access the current request's Sentry Transaction object by using the Transaction getter, which you can obtain by using the `getTx` symbol. You can obtain the Sentry object itself by just importing it from this package.
 
 ```ts
 
