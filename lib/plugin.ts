@@ -169,8 +169,8 @@ const FastifySentry = fastifyPlugin(async function FastifySentry(fastify, option
         })
 
         fastify.addHook('onRequest', function (req, rep, done) {
-            const method = req.routerMethod ?? req.method
-            const path = req.routerPath ?? req.url
+            const method = req.routeOptions.method ?? req.method;
+            const path = req.routeOptions.url ?? req.url;
             const tx = Sentry.startTransaction({
                 op: `${method} ${path}`,
                 name: path,
