@@ -1,6 +1,6 @@
 {
   "name": "@serdnam/fastify-sentry",
-  "version": "7.0.3",
+  "version": "7.1.0",
   "description": "Fastify Sentry plugin",
   "main": "./dist/index.js",
   "exports": {
